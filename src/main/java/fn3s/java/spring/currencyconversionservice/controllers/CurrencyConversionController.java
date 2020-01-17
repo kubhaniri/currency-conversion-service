@@ -1,6 +1,7 @@
 package fn3s.java.spring.currencyconversionservice.controllers;
 
 import fn3s.java.spring.currencyconversionservice.bean.CurrencyConversionBean;
+import fn3s.java.spring.currencyconversionservice.config.Configuration;
 import fn3s.java.spring.currencyconversionservice.proxy.CurrencyExchangeServiceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,9 @@ public class CurrencyConversionController {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
+    private Configuration config;
+
+    @Autowired
     private CurrencyExchangeServiceProxy proxy;
 
     @GetMapping("/currency-converter/from/{from}/to/{to}/quantity/{quantity}")
@@ -36,7 +40,7 @@ public class CurrencyConversionController {
         uriVariable.put("to", to);
         ResponseEntity<CurrencyConversionBean> forEntity = new RestTemplate().getForEntity(urlExchange, CurrencyConversionBean.class, uriVariable);
         CurrencyConversionBean response = forEntity.getBody();
-        log.info("this CurrencyConversionController@getCurrencyConversion Service: from = {}, to = {}", from, to);
+        log.info("this CurrencyConversionController@getCurrencyConversionFeign Service: from = {}, to = {}. Name of App: {}", from, to, config.getName());
         return new CurrencyConversionBean(response.getId(), response.getFrom(), response.getTo(), response.getConversionMultiple(), quantity, quantity.multiply(response.getConversionMultiple()), response.getPort());
     }
 
@@ -47,7 +51,7 @@ public class CurrencyConversionController {
             @PathVariable BigDecimal quantity
     )
     {
-        log.info("this CurrencyConversionController@getCurrencyConversionFeign Service: from = {}, to = {}", from, to);
+        log.info("this CurrencyConversionController@getCurrencyConversionFeign Service: from = {}, to = {}. Name of App: {}", from, to, config.getName());
         CurrencyConversionBean response = proxy.retrieveExchangeValue(from, to);
 
         return new CurrencyConversionBean(response.getId(), response.getFrom(), response.getTo(), response.getConversionMultiple(), quantity, quantity.multiply(response.getConversionMultiple()), response.getPort());
